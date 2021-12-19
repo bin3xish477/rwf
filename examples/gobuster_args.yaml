@@ -1,3 +1,4 @@
+tool: gobuster # only used for documentation purposes
 long:
   - wordlist: "/opt/seclists/discovery/web-content/raft-small-directories.txt"
   - useragent: "NoLeak"

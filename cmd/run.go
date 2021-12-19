@@ -38,7 +38,7 @@ func craftCmd(c string, ta *utils.ToolArgs) (cmd []string) {
 }
 
 var runCmd = &cobra.Command{
-	Use:   "run [tool_name] [tool_args]",
+	Use:   "run [tool] [tool_args]",
 	Short: "run a CLI tool with arguments specified in rwf YAML file",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
