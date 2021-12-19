@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -45,7 +47,8 @@ var runCmd = &cobra.Command{
 		var toolArgs utils.ToolArgs
 		utils.ParseArgs(file, &toolArgs)
 
-		fmt.Printf("[%s•%s] Setting environment variables:\n", utils.Green, utils.End)
+		fmt.Printf("[%s••%s] %sSetting Environment Variables%s:\n",
+			utils.Green, utils.End, utils.Bold, utils.End)
 		for _, env := range toolArgs.EnvVars {
 			for k, v := range env {
 				utils.SetEnv(k, v)
@@ -53,17 +56,39 @@ var runCmd = &cobra.Command{
 		}
 
 		cmdAsList := craftCmd(strings.Join(args, " "), &toolArgs)
-		fmt.Printf("[%s•%s] Running command:\n  + %s\n",
-			utils.Red, utils.End, strings.Join(cmdAsList, " "))
+		fmt.Printf("[%s••%s] %sCommand%s:\n  + %s\n",
+			utils.Red, utils.End, utils.Bold, utils.End,
+			strings.Join(cmdAsList, " "),
+		)
 
-		fmt.Printf("[%s•%s] %sResults%s:\n\n",
-			utils.Blue, utils.End, utils.UnderL, utils.End)
+		fmt.Printf("[%s••%s] %sResults%s:\n",
+			utils.Blue, utils.End, utils.Bold, utils.End)
 
+		finish := make(chan bool, 1)
 		now := time.Now()
-		utils.ExecuteCmd(cmdAsList[0], cmdAsList[1:])
+
+		go func() {
+			utils.ExecuteCmd(cmdAsList[0], cmdAsList[1:])
+			finish <- true
+		}()
+
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		signal.Notify(c, os.Kill)
+
+		go func() {
+			<-c
+			fmt.Printf("[%s••%s] %sCaught Ctrl+C, Gracefully Exiting...%s\n",
+				utils.Red, utils.End, utils.Bold, utils.End)
+			return
+		}()
+
+		// blocking
+		_ = <-finish
+
 		end := time.Since(now)
-		fmt.Printf("[%s•%s] Finished in %s\n",
-			utils.Purple, utils.End, end)
+		fmt.Printf("[%s••%s] %sFinished in %s%s\n",
+			utils.Purple, utils.End, utils.Bold, utils.End, end)
 	},
 }
 

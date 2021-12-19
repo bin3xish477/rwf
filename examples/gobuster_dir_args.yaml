@@ -1,0 +1,14 @@
+tool: gobuster # only used for documentation purposes
+long:
+  - wordlist: "/opt/seclists/discovery/web-content/raft-small-directories.txt"
+  - useragent: "NoLeak"
+  - no-error: true
+  - quiet: true
+  - threads: 10
+  - extensions: "php,txt"
+short:
+  #- u: "https://www.amazon.com"
+  - r: true
+  - e: true
+env:
+  - HTTP_PROXY: ""
